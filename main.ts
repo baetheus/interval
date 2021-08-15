@@ -1,27 +1,30 @@
 import { html, render } from "https://cdn.skypack.dev/lit-html?dts";
-
-const hello = (name: string, count: number, click: () => void) =>
-  html`
-<h1>Hello ${name}</h1>
-<p>${count}</p>
-<button @click=${click}>Click Me</button>
-`;
+import { create, event } from "https://cdn.skypack.dev/most-subject?dts";
+import {
+  runEffects,
+  startWith,
+  tap,
+} from "https://cdn.skypack.dev/@most/core?dts";
+import {
+  currentTime,
+  newDefaultScheduler,
+} from "https://cdn.skypack.dev/@most/scheduler?dts";
 
 // deno-lint-ignore no-explicit-any
 declare const document: any;
 
-const run = (value: unknown) => render(value, document.body);
+// Stream
+const scheduler = newDefaultScheduler();
 
-const setup = () => {
-  let count = 0;
-  const update = () => run(hello("brandon", count, inc));
+const [sink, stream] = create<number>();
 
-  const inc = () => {
-    count++;
-    update();
-  };
+const next = (n: number) => event(currentTime(scheduler), n, sink);
 
-  update();
-};
+// Template
+const hello = (count: number, click: () => void) =>
+  html`<h1>${count}</h1><button @click=${click}>Add 1</button>`;
 
-setup();
+const update = (n: number) =>
+  render(hello(n, () => next(n + 1)), document.body);
+
+runEffects(tap(update, startWith(0, stream)), scheduler);
