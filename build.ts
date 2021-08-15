@@ -1,54 +1,35 @@
 import { minify } from "https://cdn.skypack.dev/terser?dts";
 
-type Pair = {
-  code?: string;
-  map?: string;
-};
+const DENO_BUNDLE_KEY = "deno:///bundle.js";
+const DEFAULT_INPUT = "main.ts";
+const DEFAULT_OUTPUT = "bundle.js";
+const DEFAULT_TSCONFIG = "tsconfig.json";
 
 try {
   // Get tsconfig.json
-  const tsconfig = await Deno.readTextFile("tsconfig.json");
+  const tsconfig = await Deno.readTextFile(DEFAULT_TSCONFIG);
   const compilerOptions = JSON.parse(tsconfig).compilerOptions;
 
   // Bundle main.ts
-  const { files } = await Deno.emit("./main.ts", {
+  const { files } = await Deno.emit(DEFAULT_INPUT, {
     bundle: "module",
     compilerOptions,
   });
 
-  // Create code/sourcemap pairs
-  const pairs = Object.entries(files).reduce((pairs, entry) => {
-    const fileName = entry[0].replace("deno:///", "");
-    const key = fileName.replace(".map", "");
-    const isMap = fileName.includes(".map");
+  // Get bundle.js from files object
+  const bundle = files[DENO_BUNDLE_KEY];
 
-    if (pairs[key] === undefined) {
-      pairs[key] = {};
-    }
+  if (bundle === undefined) {
+    throw new Error(`Unable to find bundle at key: ${DENO_BUNDLE_KEY}`);
+  }
 
-    if (isMap) {
-      pairs[key].map = entry[1];
-    } else {
-      pairs[key].code = entry[1];
-    }
+  // Minify code with terser
+  const { code } = await minify({ [DEFAULT_INPUT]: bundle });
 
-    return pairs;
-  }, {} as Record<string, Pair>);
-
-  // Write bundle to local directory
-  for (const [key, pair] of Object.entries(pairs)) {
-    if (pair.code === undefined) {
-      throw new Error(`No code found for ${key}`);
-    }
-
-    const { code } = await minify({ [key]: pair.code });
-    // const { code, map } = pair;
-
-    if (typeof code === "string") {
-      Deno.writeTextFileSync(key, code);
-    }
+  // Output code to file
+  if (typeof code === "string") {
+    await Deno.writeTextFile(DEFAULT_OUTPUT, code);
   }
 } catch (e) {
   console.error(e);
-  // something went wrong, inspect `e` to determine
 }
