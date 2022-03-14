@@ -21,6 +21,16 @@ const DefaultIntervalSettings: IntervalSettings = {
   repeat: 4,
 };
 
+["work", "rest", "repeat"].forEach((key) => {
+  const item = window.localStorage.getItem(key);
+  if (item !== null) {
+    const value = parseInt(item, 10);
+    if (!isNaN(value)) {
+      DefaultIntervalSettings[key as keyof IntervalSettings] = value;
+    }
+  }
+});
+
 // Utilities
 const useInput = (initialValue: number): [number, (e: InputEvent) => void] => {
   const [value, setValue] = useState(initialValue);
@@ -35,7 +45,7 @@ const range = (length: number) => Array.from({ length }, (_, i) => i);
 
 // Audio Constants
 const sweepLength = 0.5;
-const attackTime = 0.001;
+const attackTime = 0.01;
 const releaseTime = 0.2;
 const baseFrequency = 320;
 
@@ -160,6 +170,9 @@ const Interval = () => {
     }
     setSettings(s);
     setRun(true);
+    window.localStorage.setItem("work", s.work.toString());
+    window.localStorage.setItem("rest", s.rest.toString());
+    window.localStorage.setItem("repeat", s.repeat.toString());
   }, [oscStarted]);
   const onCancel = useCallback(() => {
     setRun(false);

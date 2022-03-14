@@ -379,6 +379,19 @@ const DefaultIntervalSettings = {
     rest: 5,
     repeat: 4
 };
+[
+    "work",
+    "rest",
+    "repeat"
+].forEach((key)=>{
+    const item = window.localStorage.getItem(key);
+    if (item !== null) {
+        const value = parseInt(item, 10);
+        if (!isNaN(value)) {
+            DefaultIntervalSettings[key] = value;
+        }
+    }
+});
 const useInput = (initialValue)=>{
     const [value1, setValue] = F1(initialValue);
     const onInput = R1((e)=>{
@@ -411,7 +424,7 @@ const playNote = (frequency = 320)=>{
     osc.frequency.value = frequency;
     sweepEnv.gain.cancelScheduledValues(time);
     sweepEnv.gain.setValueAtTime(0, time);
-    sweepEnv.gain.linearRampToValueAtTime(0.5, time + 0.001);
+    sweepEnv.gain.linearRampToValueAtTime(0.5, time + 0.01);
     sweepEnv.gain.linearRampToValueAtTime(0, time + 0.5 - 0.2);
 };
 const Settings = ({ settings , onSave  })=>{
@@ -498,6 +511,9 @@ const Interval = ()=>{
         }
         setSettings(s8);
         setRun(true);
+        window.localStorage.setItem("work", s8.work.toString());
+        window.localStorage.setItem("rest", s8.rest.toString());
+        window.localStorage.setItem("repeat", s8.repeat.toString());
     }, [
         oscStarted
     ]);
