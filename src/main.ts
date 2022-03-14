@@ -34,25 +34,26 @@ const useInput = (initialValue: number): [number, (e: InputEvent) => void] => {
 const range = (length: number) => Array.from({ length }, (_, i) => i);
 
 const context = new AudioContext();
+const osc = context.createOscillator();
+osc.type = "square";
+osc.frequency.value = 440;
+
+const sweepEnv = context.createGain();
+sweepEnv.gain.value = 0;
+osc.connect(sweepEnv).connect(context.destination);
+
 const sweepLength = 0.5;
 const attackTime = 0.0;
 const releaseTime = 0.2;
 
 const playNote = (frequency = 440) => {
   const time = context.currentTime;
-  const osc = context.createOscillator();
-  osc.type = "square";
   osc.frequency.value = frequency;
 
-  const sweepEnv = context.createGain();
   sweepEnv.gain.cancelScheduledValues(time);
   sweepEnv.gain.setValueAtTime(0, time);
   sweepEnv.gain.linearRampToValueAtTime(1, time + attackTime);
   sweepEnv.gain.linearRampToValueAtTime(0, time + sweepLength - releaseTime);
-
-  osc.connect(sweepEnv).connect(context.destination);
-  osc.start(time);
-  osc.stop(time + sweepLength);
 };
 
 // Components
@@ -148,11 +149,16 @@ const Timer = (
 const Interval = () => {
   const [settings, setSettings] = useState(DefaultIntervalSettings);
   const [run, setRun] = useState(false);
+  const [oscStarted, setOscStarted] = useState(false);
 
   const onSave = useCallback((s: IntervalSettings) => {
+    if (!oscStarted) {
+      setOscStarted(true);
+      osc.start(context.currentTime);
+    }
     setSettings(s);
     setRun(true);
-  }, []);
+  }, [oscStarted]);
   const onCancel = useCallback(() => {
     setRun(false);
   }, []);
