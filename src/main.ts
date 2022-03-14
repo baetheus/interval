@@ -52,7 +52,7 @@ const playNote = (frequency = 440) => {
 
   sweepEnv.gain.cancelScheduledValues(time);
   sweepEnv.gain.setValueAtTime(0, time);
-  sweepEnv.gain.linearRampToValueAtTime(1, time + attackTime);
+  sweepEnv.gain.linearRampToValueAtTime(0.5, time + attackTime);
   sweepEnv.gain.linearRampToValueAtTime(0, time + sweepLength - releaseTime);
 };
 
