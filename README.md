@@ -1,3 +1,3 @@
-# Interval Timer
+# [https://interval.ignoble.dev](https://interval.ignoble.dev)
 
-A super simple interval timer
+A stupid simple interval timer because why does everything require ads!?
