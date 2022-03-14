@@ -33,20 +33,22 @@ const useInput = (initialValue: number): [number, (e: InputEvent) => void] => {
 
 const range = (length: number) => Array.from({ length }, (_, i) => i);
 
+// Audio Constants
+const sweepLength = 0.5;
+const attackTime = 0.001;
+const releaseTime = 0.2;
+const baseFrequency = 320;
+
 const context = new AudioContext();
 const osc = context.createOscillator();
 osc.type = "square";
-osc.frequency.value = 440;
+osc.frequency.value = baseFrequency;
 
 const sweepEnv = context.createGain();
 sweepEnv.gain.value = 0;
 osc.connect(sweepEnv).connect(context.destination);
 
-const sweepLength = 0.5;
-const attackTime = 0.0;
-const releaseTime = 0.2;
-
-const playNote = (frequency = 440) => {
+const playNote = (frequency = baseFrequency) => {
   const time = context.currentTime;
   osc.frequency.value = frequency;
 
@@ -80,14 +82,14 @@ const Settings = (
       <label for="work" class="pwx-3">Work ${work} second${
     work === 1 ? "" : "s"
   }</label>
-      <input type="range" id="work" min="1" max="300" step="1" value=${work} onInput=${setWork} class="ct-secondary" />
+      <input type="range" id="work" min="5" max="300" step="1" value=${work} onInput=${setWork} class="ct-secondary" />
     </section>
 
     <section class="fld-col flg-2">
       <label for="rest" class="pwx-3">Rest ${rest} second${
     rest === 1 ? "" : "s"
   }</label>
-      <input type="range" id="rest" min="0" max="300" step="1" value=${rest} onInput=${setRest} class="ct-secondary" />
+      <input type="range" id="rest" min="5" max="300" step="1" value=${rest} onInput=${setRest} class="ct-secondary" />
     </section>
 
     <section class="fld-col flg-2">
@@ -125,9 +127,9 @@ const Timer = (
   }
 
   if (time >= 1 && time <= 3) {
-    playNote(440);
+    playNote(baseFrequency);
   } else if (time === 0) {
-    playNote(440 * 2);
+    playNote(baseFrequency * 2);
   }
 
   useEffect(() => {

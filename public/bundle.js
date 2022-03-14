@@ -398,19 +398,20 @@ const range = (length)=>Array.from({
     }, (_, i5)=>i5
     )
 ;
+const baseFrequency = 320;
 const context = new AudioContext();
 const osc = context.createOscillator();
 osc.type = "square";
-osc.frequency.value = 440;
+osc.frequency.value = baseFrequency;
 const sweepEnv = context.createGain();
 sweepEnv.gain.value = 0;
 osc.connect(sweepEnv).connect(context.destination);
-const playNote = (frequency = 440)=>{
+const playNote = (frequency = 320)=>{
     const time = context.currentTime;
     osc.frequency.value = frequency;
     sweepEnv.gain.cancelScheduledValues(time);
     sweepEnv.gain.setValueAtTime(0, time);
-    sweepEnv.gain.linearRampToValueAtTime(1, time + 0);
+    sweepEnv.gain.linearRampToValueAtTime(0.5, time + 0.001);
     sweepEnv.gain.linearRampToValueAtTime(0, time + 0.5 - 0.2);
 };
 const Settings = ({ settings , onSave  })=>{
@@ -432,12 +433,12 @@ const Settings = ({ settings , onSave  })=>{
   <article class="fld-col flg-5">
     <section class="fld-col flg-2">
       <label for="work" class="pwx-3">Work ${work} second${work === 1 ? "" : "s"}</label>
-      <input type="range" id="work" min="1" max="300" step="1" value=${work} onInput=${setWork} class="ct-secondary" />
+      <input type="range" id="work" min="5" max="300" step="1" value=${work} onInput=${setWork} class="ct-secondary" />
     </section>
 
     <section class="fld-col flg-2">
       <label for="rest" class="pwx-3">Rest ${rest} second${rest === 1 ? "" : "s"}</label>
-      <input type="range" id="rest" min="0" max="300" step="1" value=${rest} onInput=${setRest} class="ct-secondary" />
+      <input type="range" id="rest" min="5" max="300" step="1" value=${rest} onInput=${setRest} class="ct-secondary" />
     </section>
 
     <section class="fld-col flg-2">
@@ -466,9 +467,9 @@ const Timer = ({ settings , onCancel  })=>{
         setTime(plan[index + 1]);
     }
     if (time >= 1 && time <= 3) {
-        playNote(440);
+        playNote(320);
     } else if (time === 0) {
-        playNote(440 * 2);
+        playNote(320 * 2);
     }
     T1(()=>{
         const handle = setInterval(()=>{
