@@ -4,6 +4,8 @@
       "dom",
       "esnext"
     ],
-    "strict": true
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true
   }
 }
